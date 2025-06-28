@@ -35,7 +35,7 @@ git clone https://github.com/nazibul7/nextjs-auth-boilerplate.git
 
 cd nextjs-auth-boilerplate
 
-3️⃣ Install packages with yarn
-```bash
+3️⃣ Install packages with npm
+
 npm install
 
