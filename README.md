@@ -16,6 +16,8 @@ A production-ready authentication system using **Next.js 14**, **Auth.js (NextAu
 ✅ Next.js middleware to protect routes
 ✅ Shadcn UI components (button,card,input)
 
+---
+
 ## ⚙️ Tech Stack
 
 - **Next.js 14 (App Router + Server Actions)**
@@ -24,18 +26,23 @@ A production-ready authentication system using **Next.js 14**, **Auth.js (NextAu
 - **Tailwind CSS + Shadcn UI**
 - **Typescript + Zod**
 
+---
+
+
 ## ✅ Getting Started
 
 1️⃣ **Clone the repo**
 
 ```bash
 git clone https://github.com/nazibul7/nextjs-auth-boilerplate.git
+```
 
 2️⃣ Go to the project folder
-
+```bash
 cd nextjs-auth-boilerplate
-
+```
 3️⃣ Install packages with npm
-
+```bash
 npm install
+```
 
