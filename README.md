@@ -32,7 +32,7 @@ A production-ready authentication system using **Next.js 14**, **Auth.js (NextAu
 git clone https://github.com/nazibul7/nextjs-auth-boilerplate.git
 
 2️⃣ Go to the project folder
-```bash
+
 cd nextjs-auth-boilerplate
 
 3️⃣ Install packages with yarn
