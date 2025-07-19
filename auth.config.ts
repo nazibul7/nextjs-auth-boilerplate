@@ -1,5 +1,36 @@
 import { NextAuthConfig } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import { LoginSchema } from "./app/schemas";
+import { getUserByEmail } from "./data/user";
+import bcrypt from "bcryptjs"
 
-export default { providers: [Google, GitHub] } satisfies NextAuthConfig
+export default {
+    trustHost: true,
+    // Defines how users sign in
+    providers:
+        [CredentialsProvider({
+            async authorize(credentials, request) {
+
+                // validate input
+                const validateField = LoginSchema.safeParse(credentials);
+                if (validateField.success) {
+                    const { email, password } = validateField.data;
+
+                    // fetch user from db
+                    const user = await getUserByEmail(email);
+
+                    // user not found || user exist but no password via OAuth & has no password
+                    if (!user || !user.password) return null;
+
+                    // password verification
+                    const passwordMatch = await bcrypt.compare(password, user.password);
+                    if (passwordMatch) return user;
+                }
+                return null;
+            }
+        }), Google, GitHub]
+} satisfies NextAuthConfig
+
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
