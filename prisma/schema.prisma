@@ -35,7 +35,7 @@ model Account {
   userId            String  @unique
   type              String
   provider          String  @unique
-  ProviderAccountId String  @unique
+  providerAccountId String  @unique
   refresh_token     String? @db.Text
   access_token      String? @db.Text
   expires_at        Int?
@@ -46,7 +46,7 @@ model Account {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, ProviderAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
