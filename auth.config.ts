@@ -30,7 +30,16 @@ export default {
                 }
                 return null;
             }
-        }), Google, GitHub]
+        }),
+            Google({
+                clientId:process.env.GOOGLE_CLIENT_ID,
+                clientSecret:process.env.GOOGLE_CLIENT_SECRET
+            }),
+            GitHub({
+                clientId:process.env.GITHUB_CLIENT_ID,
+                clientSecret:process.env.GITHUB_CLIENT_SECRET,
+            })
+        ]
 } satisfies NextAuthConfig
 
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
