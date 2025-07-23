@@ -11,8 +11,12 @@ import FormError from '../form-error';
 import FormSuccess from '../form-success';
 import { Button } from '../ui/button';
 import CardWrapper from './card-wrapper';
+import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
+    const searchParams = useSearchParams();
+    const urlError = searchParams.get("error") == "OAuthAccountNotLinked" ?
+        "Eamil is already in use with different provider!" : ""
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition()
@@ -29,7 +33,7 @@ export function LoginForm() {
         setSuccess("")
         startTransition(async () => {
             const data = await login(values);
-            if (data.error) {
+            if (data?.error) {
                 setError(data.error);
             }
             if (data.success) {
@@ -68,7 +72,7 @@ export function LoginForm() {
                         </FormItem>
                     )}>
                     </FormField>
-                    <FormError message={error} />
+                    <FormError message={error || urlError} />
                     <FormSuccess message={success} />
                     <Button disabled={isPending} type='submit' className='w-full'>
                         {isPending ? (
