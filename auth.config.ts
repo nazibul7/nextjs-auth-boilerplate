@@ -22,23 +22,33 @@ export default {
                     const user = await getUserByEmail(email);
 
                     // user not found || user exist but no password via OAuth & has no password
-                    if (!user || !user.password) return null;
+                    if (!user) return null;
+
+                    if (!user.password) {
+                        const provider = user.accounts.map(acc => acc.provider).join(", ");
+                        throw new Error(`This email is linked to ${provider}. Use that to log in.`);
+                    }
+
+                    // Check email is verified
+                    if (!user.emailVerified) return null;
 
                     // password verification
                     const passwordMatch = await bcrypt.compare(password, user.password);
-                    if (passwordMatch) return user;
+                    if (!passwordMatch) return null;
+
+                    return user;
                 }
                 return null;
             }
         }),
-            Google({
-                clientId:process.env.GOOGLE_CLIENT_ID,
-                clientSecret:process.env.GOOGLE_CLIENT_SECRET
-            }),
-            GitHub({
-                clientId:process.env.GITHUB_CLIENT_ID,
-                clientSecret:process.env.GITHUB_CLIENT_SECRET,
-            })
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET
+        }),
+        GitHub({
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        })
         ]
 } satisfies NextAuthConfig
 
