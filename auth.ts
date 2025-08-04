@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { db } from "./lib/db"
-import authConfig from "./auth.config"
+import { db } from "@/lib/db"
+import authConfig from "@/auth.config"
 import { UserRole } from "@prisma/client"
 
 /**
@@ -53,6 +53,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
          * - When the user first signs in, `user` is defined.
          * - On future requests, `user` is undefined — only the `token` is reused.
          * - Fields you attach here stay in the JWT cookie until signout/expiration.
+         * - Here only need to define jwt() if you want to store custom data in the token
+         * - If I only care about email, name, etc., I can skip it.
+         * - But since you want to access token.id, token.role, etc., you need define like below.
          */
         async jwt({ token, user }) {
             // Runs on initial signin only
