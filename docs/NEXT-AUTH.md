@@ -60,4 +60,45 @@
 - It doesn't have token object. So u cannot attach data to the token here.
 -
 - So you should do it inside jwt callback,if the user just signed in, you get usdr, so you can attach data to token.
-  
+
+
+
+
+## 🧠 When does jwt() run?
+| Scenario                                   | `jwt()` runs? | Why?                                               |
+| ------------------------------------------ | ------------- | -------------------------------------------------- |
+| ✅ Sign-in (e.g. `/api/auth/callback`)      | Yes           | Create a new JWT                                   |
+| ✅ Middleware or `auth()` call              | Yes           | Decode JWT and "rebuild" it (even without changes) |
+| ✅ Token refresh (if using custom logic)    | Yes           | You can modify/refresh token                       |
+| ❌ You never call any session-related logic | No            | It's not needed                                    |
+
+
+
+
+## 🧠 When does session() run?
+
+| Scenario                              | `session()` runs? | Why?                              |
+| ------------------------------------- | ----------------- | --------------------------------- |
+| ✅ After `jwt()` (always)              | Yes               | Convert token into session object |
+| ✅ On `auth()` or `getServerSession()` | Yes               | Needed to return `session.user`   |
+| ❌ If you never ask for session        | No                | No reason to run                  |
+
+## 🔍 Why does jwt() run on every auth() call?
+- Because NextAuth must:
+- Read the JWT cookie
+- Decode it
+- Run jwt() to reconstruct/validate/transform the token
+- Then run session() to construct the final session object
+- This ensures that any token updates, custom claims, or logic written in jwt() is always applied — even when just reading the session.
+
+
+## ⚠️ If jwt() didn’t run first?
+- Then session() would receive an outdated or empty token, leading to a broken or incomplete session.
+- API routes uses getToken() only token use no session that means no session() calback run only jwt() runs.
+
+## 🔄 So yes — every auth() or getServerSession() call runs this flow:
+  JWT Cookie →
+    🔓 Decode →
+      🔁 jwt({ token }) →
+        🎯 session({ session, token }) →
+          ✅ Return session
