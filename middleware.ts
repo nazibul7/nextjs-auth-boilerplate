@@ -1,5 +1,5 @@
-import { auth } from "./auth";
-import { publicRoutes, authRoutes, apiAuthPrefix, default_login_redirect } from "./routes";
+import { auth } from "@/auth";
+import { publicRoutes, authRoutes, apiAuthPrefix, default_login_redirect } from "@/routes";
 import { NextResponse } from "next/server";
 
 
@@ -15,10 +15,6 @@ import { NextResponse } from "next/server";
  */
 
 export default auth((req) => {
-    // console.log("From middleware");
-    // console.log("Route", !!req.auth);
-    // console.log(authRoutes[0], req.url);
-
     const isApiAuthRoute = req.nextUrl.pathname.startsWith(apiAuthPrefix);
     const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
