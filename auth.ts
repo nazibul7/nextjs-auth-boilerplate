@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "@/lib/db"
 import authConfig from "@/auth.config"
 import { UserRole } from "@prisma/client"
+import { getUserById } from "@/data/user"
 
 /**
  * AuthOptions config defines how NextAuth handles authentication, session, JWT, and custom pages.
@@ -34,18 +35,47 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
          */
         async signIn({ user, account }) {
             // For OAuth providers, email is already verified by the provider
-            if (account?.provider != "credentials") {
-                if (user.email && !user.emailVerified) {
-                    await db.user.update({
-                        where: { email: user.email },
-                        data: { emailVerified: new Date() }
-                    });
-                }
-                return true;
-            }
-            // For credentials login, email verification is setup in     authorize()
+            console.log("AUTH");
+
+            // if (account?.provider != "credentials") {
+            //     if (user.email && !user.emailVerified) {
+            /**
+             * Use Upsert used here. Because,
+             * 
+             * For very first user with OAuth signin when it call db.user.update it showing below error. 
+             * Invalid `prisma.user.update()` invocation:
+             * An operation failed because it depends on one or more records that were required but not found.
+             * No record was found for an update.
+             * 
+             * upsert== update or insert
+             * 
+             * But with upsert also Having prisma adapter it is creating **two user** in DB with here to use email:user.email??undefined**
+             * or will show error **Eamil is already in use with different provider!**
+             * So the best thing is use **event.createUser** callabck only 
+             */
+            // await db.user.upsert({
+            //     where: { email: user.email },
+            //     create: {
+            //         name: user.name ?? undefined,
+            //         email:user.email??undefined
+            //     },
+            //     update: {
+            //         emailVerified: new Date()
+            //     }
+            // });
+
+            /**
+             * Allow OAuth without email verification
+             * Have put emailverified logic Use the events.createUser callback to update emailVerified after user creation.
+             * For credentials login, email verification is setup in authorize()
+             */
+            if (account?.provider !== "credentials") return true;
+            const existingUser = await getUserById(user.id as string);
+            if (!existingUser?.emailVerified) return false;
             return true;
         },
+
+
 
         /**
          * jwt callback:
@@ -83,6 +113,34 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             return session;
         },
     },
+    /**
+     * createUser → run once on initial user creation (credentials or OAuth)
+     * Because createUser runs at the moment the user account is first created, before the sign-in attempt completes.
+     * The user exists in the DB already, but your signIn callback can still block them from logging in 
+     * until they verify their email.
+     * Blocking sign-in does not remove or prevent user creation, 
+     * it just prevents that user from authenticating until conditions are met (email verified).
+     */
+    events: {
+        async createUser({ user, }) {
+            // Find linked account for this user
+            const account = await db.account.findFirst({
+                where: { userId: user.id },
+            });
+
+            // Set emailVerified as soon as the user is created (for OAuth)
+            if (account && account.provider !== "credentials" && user.email && !user.emailVerified) {
+                await db.user.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        emailVerified: new Date()
+                    }
+                })
+            }
+        },
+    },
     pages: {
         /**
          * Custom pages:
@@ -92,5 +150,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         signIn: '/auth/login', // Custom login page
         error: '/auth/error',  // Redirect here on auth errors (e.g., OAuth or callback issues)
     },
-
 })  
