@@ -13,32 +13,36 @@ export default {
         [CredentialsProvider({
             async authorize(credentials, request) {
 
-                // validate input
+                // validate input with zod schema
                 const validateField = LoginSchema.safeParse(credentials);
-                if (validateField.success) {
-                    const { email, password } = validateField.data;
-
-                    // fetch user from db
-                    const user = await getUserByEmail(email);
-
-                    // user not found || user exist but no password via OAuth & has no password
-                    if (!user) return null;
-
-                    if (!user.password) {
-                        const provider = user.accounts.map(acc => acc.provider).join(", ");
-                        throw new Error(`This email is linked to ${provider}. Use that to log in.`);
-                    }
-
-                    // Check email is verified
-                    if (!user.emailVerified) return null;
-
-                    // password verification
-                    const passwordMatch = await bcrypt.compare(password, user.password);
-                    if (!passwordMatch) return null;
-
-                    return user;
+                if (!validateField.success) {
+                    throw new Error("Invalid login details. Please check your email and password.");
                 }
-                return null;
+
+                const { email, password } = validateField.data;
+
+                // fetch user from db
+                const user = await getUserByEmail(email);
+
+                // user not found || user exist but no password via OAuth & has no password
+                if (!user) return null;
+
+                if (!user.password) {
+                    const provider = user.accounts.map(acc => acc?.provider).join(", ");
+                    throw new Error(`This email is linked to ${provider}. Please log in using ${provider}.`);
+                }
+                // Check email is verified
+                if (!user.emailVerified) {
+                    throw new Error("Please verify your email address before logging in.");
+                };
+
+                // password verification
+                const passwordMatch = await bcrypt.compare(password, user.password);
+                if (!passwordMatch) {
+                    throw new Error("Incorrect password. Please try again.");
+                };
+
+                return user;
             }
         }),
         Google({
@@ -52,4 +56,3 @@ export default {
         ]
 } satisfies NextAuthConfig
 
-console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
