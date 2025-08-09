@@ -5,7 +5,7 @@ A production-ready authentication system using **Next.js 14**, **Auth.js (NextAu
 - Credentials login & OAuth (Google &Github)
 - Protected API routes & Server Actions
 - Shadcn UI components
-- Typescript & Zos validation
+- Typescript & Zod validation
 
 ---
 
@@ -45,4 +45,9 @@ cd nextjs-auth-boilerplate
 ```bash
 npm install
 ```
+4️⃣ Start the development server
+```bash
+npm run dev
+```
+
 
