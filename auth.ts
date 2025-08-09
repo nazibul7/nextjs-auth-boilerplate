@@ -33,21 +33,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
          * - Restrict sign-ins based on user role, status, or provider.
          * - Auto-verify OAuth emails.
          */
-        async signIn({ user, account }) {
-            // For OAuth providers, email is already verified by the provider
-            console.log("AUTH");
-
-            // if (account?.provider != "credentials") {
-            //     if (user.email && !user.emailVerified) {
+        async signIn({ user, account, profile }) {
             /**
-             * Use Upsert used here. Because,
+             * Didn't Use Upsert here. Because,
              * 
              * For very first user with OAuth signin when it call db.user.update it showing below error. 
              * Invalid `prisma.user.update()` invocation:
              * An operation failed because it depends on one or more records that were required but not found.
              * No record was found for an update.
              * 
-             * upsert== update or insert
+             * upsert == update or insert
              * 
              * But with upsert also Having prisma adapter it is creating **two user** in DB with here to use email:user.email??undefined**
              * or will show error **Eamil is already in use with different provider!**
@@ -69,6 +64,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
              * Have put emailverified logic Use the events.createUser callback to update emailVerified after user creation.
              * For credentials login, email verification is setup in authorize()
              */
+            // For OAuth providers, email is already verified by the provider
+
             if (account?.provider !== "credentials") return true;
             const existingUser = await getUserById(user.id as string);
             if (!existingUser?.emailVerified) return false;
@@ -114,6 +111,22 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         },
     },
     /**
+     * NextAuth `events.createUser`:
+     * Runs ONLY when NextAuth itself creates a new user in the database
+     * 
+     * via the configured Adapter (adapter.createUser()).
+     * 
+     * Common cases:
+     *   - ✅ First-time OAuth login (Google, GitHub, etc.) when no existing user
+     *   - ✅ First-time Email provider login when no existing user
+     * 
+     * Will NOT run when:
+     *   - ❌ Logging in with credentials after you manually registered the user
+     *   - ❌ User already exists in the database for the given email/provider
+     * 
+     * If you need "first login" logic for credentials-based accounts,
+     * handle it inside your custom registration flow or credentials `authorize` callback.
+     * 
      * createUser → run once on initial user creation (credentials or OAuth)
      * Because createUser runs at the moment the user account is first created, before the sign-in attempt completes.
      * The user exists in the DB already, but your signIn callback can still block them from logging in 
@@ -122,14 +135,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
      * it just prevents that user from authenticating until conditions are met (email verified).
      */
     events: {
-        async createUser({ user, }) {
-            // Find linked account for this user
-            const account = await db.account.findFirst({
-                where: { userId: user.id },
-            });
-
+        async createUser({ user }) {
             // Set emailVerified as soon as the user is created (for OAuth)
-            if (account && account.provider !== "credentials" && user.email && !user.emailVerified) {
+            if (user.email && !user.emailVerified) {
                 await db.user.update({
                     where: {
                         id: user.id
@@ -140,6 +148,27 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 })
             }
         },
+
+        //----------- linkAccount(message) {}---------
+        /**
+         * NextAuth `linkAccount` Event
+         *
+         * Fires after an OAuth account (Google, GitHub, etc.) is linked to a user
+         * in the database.
+         *
+         * Scenarios where it runs:
+         * 1. User logs in with an OAuth provider for the first time,
+         *    and NextAuth finds an existing user with the same email (or matches via custom linking rules).
+         * 2. A signed-in user explicitly connects an additional provider to their account
+         *    (multi-login support).
+         *
+         * ⚠️ Not ideal for first-login/email verification:
+         * - If the user is brand new via OAuth, `createUser` runs first.
+         * - `linkAccount` will run every time an OAuth account is linked, not only on first login.
+         * - Setting `emailVerified` here works only if the link happens immediately after account creation,
+         *   which is common for first OAuth logins but not guaranteed.
+         */
+
     },
     pages: {
         /**
