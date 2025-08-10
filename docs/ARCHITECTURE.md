@@ -24,3 +24,7 @@
 ## 🔄 Deployment
 - Deployed to Vercel (but works with any Node host).
 - Env variables manage DB URL, Resend API key, Auth secrets.
+
+## Authentication
+
+For a detailed overview of our authentication system design and rationale, see [AUTH-ARCHITECTURE.md](./doc/AUTH-ARCHITECTURE.md).
