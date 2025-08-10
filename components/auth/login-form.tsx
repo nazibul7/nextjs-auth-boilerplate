@@ -6,11 +6,11 @@ import { LoginFormDataType, LoginSchema } from '@/app/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { login } from '@/app/actions/login';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
-import FormError from '../form-error';
-import FormSuccess from '../form-success';
-import { Button } from '../ui/button';
-import CardWrapper from './card-wrapper';
+import { Input } from '@/components/ui/input';
+import FormError from '@/components/form-error';
+import FormSuccess from '@/components/form-success';
+import { Button } from '@/components/ui/button';
+import CardWrapper from '@/components/auth/card-wrapper';
 import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
@@ -36,7 +36,7 @@ export function LoginForm() {
             if (data?.error) {
                 setError(data.error);
             }
-            if (data.success) {
+            if (data?.success) {
                 setSuccess(data.success);
                 form.reset();
             }
