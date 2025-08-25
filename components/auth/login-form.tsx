@@ -14,7 +14,17 @@ import CardWrapper from '@/components/auth/card-wrapper';
 import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
+    /**Get the query parameters from the current URL */
     const searchParams = useSearchParams();
+
+    /**
+     * Check if the "error" query param equals "OAuthAccountNotLinked"
+     * - This error comes from NextAuth when a user tries to log in with an OAuth
+     * provider (Google, GitHub, etc.) but the email already exists in the DB
+     * with a different provider (e.g., signed up with GitHub but trying Google).
+     * If true → show a custom error message.
+     * Otherwise → return an empty string.
+     */
     const urlError = searchParams.get("error") == "OAuthAccountNotLinked" ?
         "Eamil is already in use with different provider!" : ""
     const [error, setError] = useState<string | undefined>("");
