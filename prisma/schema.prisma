@@ -26,7 +26,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(USER)
-  accounts      Account[]
+  accounts      Account[] 
   sessions      Session[]
 }
 
@@ -34,8 +34,8 @@ model Account {
   id                String  @id @default(cuid())
   userId            String  @unique
   type              String
-  provider          String  @unique
-  providerAccountId String  @unique
+  provider          String
+  providerAccountId String
   refresh_token     String? @db.Text
   access_token      String? @db.Text
   expires_at        Int?
