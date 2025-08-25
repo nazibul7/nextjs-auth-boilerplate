@@ -1,30 +1,62 @@
 "use server"
 
-import { RegisterSchema, RegisterFormDataType } from "../schemas"
-import bcryp from "bcrypt"
+import { RegisterSchema, RegisterFormDataType } from "@/app/schemas"
+import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
+import { getUserByEmail } from "@/data/user"
+import { generateVerificationToken } from "@/lib/token"
+import { sendVerificationEmail } from "@/lib/mail"
+
 
 export const register = async (data: RegisterFormDataType) => {
-    const validateFields = RegisterSchema.safeParse(data)
-    if (!validateFields.success) {
-        return { error: "Invalid fields!" };
-    }
-
-    const { name, email, password } = validateFields.data
-    const hashPassword = await bcryp.hash(password, 10);
-    const existingUser = await db.user.findUnique({ where: { email } });
-    if (existingUser) {
-        return { error: "Email already in use!" }
-    }
-    await db.user.create({
-        data: {
-            name,
-            email,
-            password: hashPassword
+    try {
+        //Validate fields with Zod
+        const validateFields = RegisterSchema.safeParse(data)
+        if (!validateFields.success) {
+            return { error: "Invalid fields!" };
         }
-    })
 
-    // Send verification email
-    
-    return { success: "Register successful! Redirecting..." };
+        const { name, email, password } = validateFields.data
+
+        // Check if user already exists
+        const existingUser = await getUserByEmail(email);
+        if (existingUser) {
+            const provider = existingUser.accounts.map(acc => acc?.provider).join(", ");
+            return { error: `This email is linked to ${provider}. Please log in using ${provider}` }
+        }
+
+        // Hash password
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        // Create user
+        await db.user.create({
+            data: {
+                name,
+                email,
+                password: hashPassword
+            }
+        })
+
+        // Generate verification token
+        const verificationToken = await generateVerificationToken(email);
+        if (!verificationToken) {
+            return {
+                error: "Could not generate verification token"
+            }
+        }
+
+        // Send verification email
+        const emailResult = await sendVerificationEmail(
+            verificationToken?.email as string,
+            verificationToken?.token as string
+        );
+
+        if (emailResult.error) {
+            return { error: emailResult.error };
+        }
+        return { success: "Confirmation email sent! Please check your inbox." };
+    } catch (error) {
+        console.error("Registration error:", error);
+        return { error: "Something went wrong. Please try again later." };
+    }
 }
