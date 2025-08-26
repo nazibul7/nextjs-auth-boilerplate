@@ -21,7 +21,14 @@ export const register = async (data: RegisterFormDataType) => {
         // Check if user already exists
         const existingUser = await getUserByEmail(email);
         if (existingUser) {
+
             const provider = existingUser.accounts.map(acc => acc?.provider).join(", ");
+
+            /** For credentilas users who doesn't have providers */
+            if (provider.length === 0 || provider.includes("credentials")) {
+                return { error: "This email is already registered. Please log in with your password." };
+            }
+            /**For Oauth users */
             return { error: `This email is linked to ${provider}. Please log in using ${provider}` }
         }
 

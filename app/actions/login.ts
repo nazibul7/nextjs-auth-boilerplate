@@ -25,7 +25,7 @@ export const login = async (data: LoginFormDataType) => {
             throw new Error("User not found");
         }
         if (!user?.emailVerified) {
-            throw new Error("Please verify your email before logging in");
+            throw new Error("Your account is not verified yet. Please check your email to verify your account.");
         }
         await signIn("credentials", {
             email,
