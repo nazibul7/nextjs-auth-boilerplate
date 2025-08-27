@@ -1,3 +1,5 @@
+"use server"
+
 import { getVerificationTokenByEmail } from "@/data/verification-token";
 import { db } from "./db";
 import { v4 as uuid } from "uuid";
