@@ -12,6 +12,7 @@ import FormSuccess from '@/components/form-success';
 import { Button } from '@/components/ui/button';
 import CardWrapper from '@/components/auth/card-wrapper';
 import { useSearchParams } from 'next/navigation';
+import ResendVerificationButton from '../resend-verification-button';
 
 export function LoginForm() {
     /**Get the query parameters from the current URL */
@@ -30,6 +31,8 @@ export function LoginForm() {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition()
+    const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+
     const form = useForm<LoginFormDataType>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
@@ -44,6 +47,7 @@ export function LoginForm() {
         startTransition(async () => {
             const data = await login(values);
             if (data?.error) {
+                setRegisteredEmail(values.email);
                 setError(data.error);
             }
             if (data?.success) {
@@ -84,6 +88,14 @@ export function LoginForm() {
                     </FormField>
                     <FormError message={error || urlError} />
                     <FormSuccess message={success} />
+
+                    {error == "Your account is not verified yet. Please check your email to verify your account." && (
+                        <div className="space-y-4 text-center">
+                            <span className="text-sm text-muted-foreground inline-flex items-center gap-x-6 my-[-5px] justify-center ga text-center w-full">
+                                Didn’t get the mail?{' '}<ResendVerificationButton email={registeredEmail as string} onError={(msg) => setError(msg)} onSuccess={msg => setSuccess(msg)} />
+                            </span>
+                        </div>
+                    )}
                     <Button disabled={isPending} type='submit' className='w-full'>
                         {isPending ? (
                             <>
