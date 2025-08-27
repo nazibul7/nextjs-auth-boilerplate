@@ -61,7 +61,7 @@ export const register = async (data: RegisterFormDataType) => {
         if (emailResult.error) {
             return { error: emailResult.error };
         }
-        return { success: "Confirmation email sent! Please check your inbox." };
+        return { success: `Verification email sent to ${email}! Please check your inbox.` };
     } catch (error) {
         console.error("Registration error:", error);
         return { error: "Something went wrong. Please try again later." };
