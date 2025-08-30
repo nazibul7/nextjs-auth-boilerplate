@@ -11,7 +11,7 @@ import FormError from '@/components/form-error';
 import FormSuccess from '@/components/form-success';
 import { Button } from '@/components/ui/button';
 import CardWrapper from '@/components/auth/card-wrapper';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ResendVerificationButton from '../resend-verification-button';
 
 export function LoginForm() {
@@ -32,6 +32,7 @@ export function LoginForm() {
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition()
     const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+    const router = useRouter()
 
     const form = useForm<LoginFormDataType>({
         resolver: zodResolver(LoginSchema),
@@ -53,6 +54,7 @@ export function LoginForm() {
             if (data?.success) {
                 setSuccess(data.success);
                 form.reset();
+                router.push('/settings');
             }
         })
     };

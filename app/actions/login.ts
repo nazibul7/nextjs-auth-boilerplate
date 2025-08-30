@@ -1,6 +1,5 @@
 "use server"
 
-import { default_login_redirect } from "@/routes"
 import { LoginFormDataType, LoginSchema } from "../schemas"
 import { signIn } from "@/auth"
 import { AuthError } from "next-auth"
@@ -30,7 +29,7 @@ export const login = async (data: LoginFormDataType) => {
         await signIn("credentials", {
             email,
             password,
-            redirectTo: default_login_redirect
+            redirect: false
         })
         return { success: "Signin successfull!" };
     } catch (error) {
