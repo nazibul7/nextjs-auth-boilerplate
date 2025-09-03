@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { getUserByEmail } from "@/data/user"
 import { generateVerificationToken } from "@/lib/token"
 import { sendVerificationEmail } from "@/lib/mail"
+import { TokenType } from "@prisma/client"
 
 
 export const register = async (data: RegisterFormDataType) => {
@@ -45,7 +46,7 @@ export const register = async (data: RegisterFormDataType) => {
         })
 
         // Generate verification token
-        const verificationToken = await generateVerificationToken(email);
+        const verificationToken = await generateVerificationToken(email,TokenType.EMAIL_VERIFICATION);
         if (!verificationToken) {
             return {
                 error: "Could not generate verification token"
