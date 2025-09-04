@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import CardWrapper from '@/components/auth/card-wrapper';
 import { register } from '@/app/actions/register';
 import ResendVerificationButton from '../resend-verification-button';
+import { TokenType } from '@prisma/client';
 
 export function RegisterForm() {
     const [error, setError] = useState<string | undefined>("");
@@ -56,7 +57,7 @@ export function RegisterForm() {
                 <div className="space-y-4 text-center">
                     <FormSuccess message={success} />
                     <span className="text-sm text-muted-foreground inline-block text-center w-full">
-                        Didn’t get the mail?{' '}<ResendVerificationButton email={registeredEmail} onError={(msg) => setError(msg)} onSuccess={msg => setSuccess(msg)} />
+                        Didn’t get the mail?{' '}<ResendVerificationButton email={registeredEmail} onError={(msg) => setError(msg)} onSuccess={msg => setSuccess(msg)} type={TokenType.EMAIL_VERIFICATION} />
                     </span>
                 </div>
             ) : (
