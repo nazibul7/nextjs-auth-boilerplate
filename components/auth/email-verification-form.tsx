@@ -1,10 +1,11 @@
 
-import { redirect } from 'next/navigation';
 import CardWrapper from '@/components/auth/card-wrapper';
-import { newVerification } from '@/app/actions/new-verification';
+import { emailVerification } from '@/app/actions/email-verification';
 import FormError from '@/components/form-error';
+import { TokenType } from '@prisma/client';
+import FormSuccess from '../form-success';
 
-export default async function NewVerificationPage({
+export default async function EmailVerificationForm({
     searchParams
 }: {
     searchParams: Promise<{ token?: string }>
@@ -27,11 +28,23 @@ export default async function NewVerificationPage({
     }
 
     /** Verify the token */
-    const result = await newVerification(token);
+    const result = await emailVerification(token, TokenType.EMAIL_VERIFICATION);
+
+    console.log(result.success);
 
     /** Redirect on success */
     if (result.success) {
-        redirect('/settings');
+        return (
+            <CardWrapper
+                headerLabel='Verification Successfull'
+                backButtonLabel='Go to login page'
+                backButtonHref='/auth/login'
+            >
+                <div className='w-full flex items-center justify-center'>
+                    <FormSuccess message={result.success} />
+                </div>
+            </CardWrapper>
+        )
     }
 
     /** Show error state */
