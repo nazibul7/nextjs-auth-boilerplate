@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import CardWrapper from '@/components/auth/card-wrapper';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ResendVerificationButton from '../resend-verification-button';
+import Link from 'next/link';
+import { TokenType } from '@prisma/client';
 
 export function LoginForm() {
     /**Get the query parameters from the current URL */
@@ -94,7 +96,7 @@ export function LoginForm() {
                     {error == "Your account is not verified yet. Please check your email to verify your account." && (
                         <div className="space-y-4 text-center">
                             <span className="text-sm text-muted-foreground inline-flex items-center gap-x-6 my-[-5px] justify-center ga text-center w-full">
-                                Didn’t get the mail?{' '}<ResendVerificationButton email={registeredEmail as string} onError={(msg) => setError(msg)} onSuccess={msg => setSuccess(msg)} />
+                                Didn’t get the mail?{' '}<ResendVerificationButton email={registeredEmail as string} onError={(msg) => setError(msg)} onSuccess={msg => setSuccess(msg)} type={TokenType.EMAIL_VERIFICATION} />
                             </span>
                         </div>
                     )}
