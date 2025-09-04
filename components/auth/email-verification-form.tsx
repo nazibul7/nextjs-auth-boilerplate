@@ -30,8 +30,6 @@ export default async function EmailVerificationForm({
     /** Verify the token */
     const result = await emailVerification(token, TokenType.EMAIL_VERIFICATION);
 
-    console.log(result.success);
-
     /** Redirect on success */
     if (result.success) {
         return (
