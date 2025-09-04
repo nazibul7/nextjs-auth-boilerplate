@@ -1,22 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { generateVerificationToken } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/mail";
+import { TokenType } from "@prisma/client";
 
 export default function ResendVerificationButton({
   email,
   onSuccess,
-  onError
+  onError,
+  type
 }:
   {
     email: string,
     onSuccess: (msg: string | undefined) => void,
     onError: (msg: string | undefined) => void
+    type: TokenType
   }) {
   const [isPending, startTransition] = useTransition();
 
+  {/* - Use <Button> directly (like you have now) when the action is something that performs an operation
+        in-place (resend verification, submit form, trigger async function).
+  
+      - Use <Link> (from next/link) when the action is navigational (redirects user to another route/page). */}
   return (
     <>
       <Button
@@ -28,7 +35,7 @@ export default function ResendVerificationButton({
           onSuccess(undefined);
           startTransition(async () => {
             try {
-              const token = await generateVerificationToken(email);
+              const token = await generateVerificationToken(email, type);
 
               if (!token) {
                 onError("Could not generate verification token");
