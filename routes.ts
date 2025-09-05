@@ -4,8 +4,7 @@
  * @type {string[]}
  */
 export const publicRoutes = [
-    "/",
-    "/auth/email-verification"
+    "/"
 ]
 
 /**
@@ -18,7 +17,9 @@ export const authRoutes = [
     "/auth/login",
     "/auth/register",
     "/auth/error",
-    "/auth/reset-password"
+    "/auth/reset-password",
+    "/auth/forgot-password",
+    "/auth/email-verification"
 ]
 
 /**
@@ -33,4 +34,4 @@ export const apiAuthPrefix = "/api/auth"
  * @type {string}
  */
 
-export const default_login_redirect="/settings"
+export const default_login_redirect = "/settings"
