@@ -5,7 +5,7 @@ import { getVerificationTokenByToken } from "@/data/verification-token"
 import { db } from "@/lib/db";
 import { TokenType } from "@prisma/client";
 
-export const emailVerification = async (token: string,type:TokenType) => {
+export const emailVerification = async (token: string, type: TokenType) => {
     try {
         /** Get the verification token from database */
         const existingToken = await getVerificationTokenByToken(token);
