@@ -13,10 +13,8 @@ export const emailVerification = async (token: string, type: TokenType) => {
             return { error: "Token does not exist!" };
         }
 
-        if(existingToken.type!=type){
-            console.log("TRUE\n");
-            
-            return {error:"Invalid token type!"}
+        if (existingToken.type != type) {
+            return { error: "Invalid token type!" }
         }
         /** Check if token has expired */
         const hasExpired = new Date(existingToken.expires) < new Date();
