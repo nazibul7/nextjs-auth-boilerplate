@@ -90,6 +90,14 @@ export function LoginForm() {
                         </FormItem>
                     )}>
                     </FormField>
+
+                    <Link href={'/auth/forgot-password'}>
+                        <Button size={"sm"} variant={'link'} className='px-0 font-medium'>
+                            Forgot password?
+                        </Button>
+                    </Link>
+
+
                     <FormError message={error || urlError} />
                     <FormSuccess message={success} />
 
