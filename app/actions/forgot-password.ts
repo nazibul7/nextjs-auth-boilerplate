@@ -8,7 +8,7 @@ import { TokenType } from "@prisma/client"
 export const requestForgotPassword = async (email: string) => {
     try {
         /**Generate verification token */
-        const token = await generateVerificationToken(email, TokenType.EMAIL_VERIFICATION);
+        const token = await generateVerificationToken(email, TokenType.PASSWORD_RESET);
         if (!token) {
             return { error: "Could not generate verification token" };
         }
