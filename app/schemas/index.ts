@@ -35,3 +35,12 @@ export const ForgotPasswordSchema = z.object({
 export type ForgotPasswordDataType = z.infer<typeof ForgotPasswordSchema>
 
 
+export const ResetPasswordSchema = z.object({
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"] /**the path property tells Zod which field the error should attach to if validation fails.Attaches error to confirmPassword field */
+});
+
+export type ResetPasswordDataType = z.infer<typeof ResetPasswordSchema>
